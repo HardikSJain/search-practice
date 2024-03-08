@@ -215,7 +215,6 @@ class _SearchPageState extends State<SearchPage> {
                                 onTap: () {},
                                 child: Container(
                                   color: const Color.fromRGBO(42, 33, 54, 1),
-                                  height: 60,
                                   child: Row(
                                     children: [
                                       Padding(
@@ -243,14 +242,34 @@ class _SearchPageState extends State<SearchPage> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  optionsData[index]['heading'],
+                                                  // if optionsData[index]['heading'] length is greater than 30 then it will be truncated first check the length of the string and then truncate it
+                                                  optionsData[index]['heading']
+                                                              .length >
+                                                          30
+                                                      ? optionsData[index]
+                                                                  ['heading']
+                                                              .substring(
+                                                                  0, 30) +
+                                                          '...'
+                                                      : optionsData[index]
+                                                          ['heading'],
+
                                                   style: const TextStyle(
                                                     color: Colors.white,
                                                   ),
                                                 ),
                                                 Text(
                                                   optionsData[index]
-                                                      ['subheading'],
+                                                                  ['subheading']
+                                                              .length >
+                                                          30
+                                                      ? optionsData[index]
+                                                                  ['subheading']
+                                                              .substring(
+                                                                  0, 30) +
+                                                          '...'
+                                                      : optionsData[index]
+                                                          ['subheading'],
                                                   style: const TextStyle(
                                                     color: Colors.grey,
                                                   ),

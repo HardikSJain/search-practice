@@ -30,6 +30,12 @@ class SearchUseCase {
         'subheading': 'Short term idea',
         'isBookmarked': false,
       },
+      {
+        'heading':
+            'Vehicle Cell overflowed overflowed overflowed overflowed overflowed',
+        'subheading': 'Short term idea overflowed overflowed overflowed',
+        'isBookmarked': false,
+      },
     ];
   }
 }
