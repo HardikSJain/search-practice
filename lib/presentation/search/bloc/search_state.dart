@@ -22,3 +22,9 @@ class SearchSuccess extends HomeState {
 
   SearchSuccess(this.optionsData);
 }
+
+class OptionSelectedSuccess extends HomeState {
+  final List<Map<String, dynamic>> filteredOptionsData;
+
+  OptionSelectedSuccess(this.filteredOptionsData);
+}

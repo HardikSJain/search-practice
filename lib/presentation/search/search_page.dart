@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:temp/domain/usecases/search_use_case.dart';
+import 'package:temp/presentation/common/svg_constants.dart';
 import 'package:temp/presentation/search/bloc/search_bloc.dart';
+import 'package:temp/presentation/search/widgets/search_app_bar.dart';
 import 'package:temp/presentation/widgets/custom_sliver_appbar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -54,47 +56,33 @@ class _SearchPageState extends State<SearchPage> {
         optionsData = state.optionsData;
       });
     }
+    if (state is OptionSelectedSuccess) {
+      setState(() {
+        optionsData = state.filteredOptionsData;
+      });
+    }
   }
 
-  Widget _options(String option, bool isSelected) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: isSelected
-              ? const Color.fromRGBO(1, 195, 109, 1)
-              : const Color.fromRGBO(163, 165, 167, 1),
-        ),
-        borderRadius: BorderRadius.circular(10),
-        gradient: isSelected
-            ? const LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color(0xFF393046),
-                  Color(0xFF2D2537),
-                ],
-              )
-            : null,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16.0,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              option,
-              style: TextStyle(
-                color: isSelected
-                    ? const Color.fromRGBO(1, 195, 109, 1)
-                    : const Color.fromRGBO(163, 165, 167, 1),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  changeOption(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
+
+  onOptionSelected(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+    _searchBloc.add(OptionSelectedEvent(index));
+  }
+
+  onSearch(String value) {
+    _searchBloc.add(SearchEvent(value));
+  }
+
+  // function to return sliced string
+  String sliceString(String string) {
+    return string.length > 30 ? '${string.substring(0, 30)}...' : string;
   }
 
   @override
@@ -111,100 +99,20 @@ class _SearchPageState extends State<SearchPage> {
               Expanded(
                 child: SmartRefresher(
                   controller: _refreshController,
-                  enablePullDown: true,
+                  enablePullDown: false,
+                  enablePullUp: true,
                   physics: const BouncingScrollPhysics(),
                   child: CustomScrollView(
                     slivers: [
                       CustomSliverAppBar.widgetWrapper(
-                        context: context,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 8,
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsets.only(right: 8.0),
-                                      child: TextField(
-                                        onChanged: (value) =>
-                                            _searchBloc.add(SearchEvent(value)),
-                                        style: const TextStyle(
-                                          color:
-                                              Color.fromRGBO(235, 236, 236, 1),
-                                        ),
-                                        decoration: InputDecoration(
-                                          prefixIcon: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: SvgPicture.asset(
-                                              "assets/svgs/search.svg",
-                                              height: 8,
-                                              width: 8,
-                                            ),
-                                          ),
-                                          fillColor: const Color.fromRGBO(
-                                              42, 33, 54, 1),
-                                          border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            borderSide: BorderSide.none,
-                                          ),
-                                          filled: true,
-                                          hintText:
-                                              'Search by Stock Name, Patterns...',
-                                          hintStyle: const TextStyle(
-                                            color: Color.fromRGBO(
-                                                235, 236, 236, 0.3),
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {},
-                                    icon: const Icon(
-                                      Icons.close,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 16,
-                              ),
-                              SizedBox(
-                                height: 35,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: options.length,
-                                  itemBuilder: (context, index) {
-                                    return GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          selectedIndex = index;
-                                        });
-                                      },
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8.0),
-                                        child: _options(
-                                          options[index],
-                                          index == selectedIndex,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                          context: context,
+                          child: SearchHeader(
+                            onOptionSelected: onOptionSelected,
+                            changeOption: changeOption,
+                            options: options,
+                            selectedIndex: selectedIndex,
+                            onSearch: onSearch,
+                          )),
                       SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
@@ -242,34 +150,15 @@ class _SearchPageState extends State<SearchPage> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  // if optionsData[index]['heading'] length is greater than 30 then it will be truncated first check the length of the string and then truncate it
-                                                  optionsData[index]['heading']
-                                                              .length >
-                                                          30
-                                                      ? optionsData[index]
-                                                                  ['heading']
-                                                              .substring(
-                                                                  0, 30) +
-                                                          '...'
-                                                      : optionsData[index]
-                                                          ['heading'],
-
+                                                  sliceString(optionsData[index]
+                                                      ['heading']),
                                                   style: const TextStyle(
                                                     color: Colors.white,
                                                   ),
                                                 ),
                                                 Text(
-                                                  optionsData[index]
-                                                                  ['subheading']
-                                                              .length >
-                                                          30
-                                                      ? optionsData[index]
-                                                                  ['subheading']
-                                                              .substring(
-                                                                  0, 30) +
-                                                          '...'
-                                                      : optionsData[index]
-                                                          ['subheading'],
+                                                  sliceString(optionsData[index]
+                                                      ['subheading']),
                                                   style: const TextStyle(
                                                     color: Colors.grey,
                                                   ),
@@ -292,8 +181,8 @@ class _SearchPageState extends State<SearchPage> {
                                         },
                                         icon: SvgPicture.asset(
                                           optionsData[index]['isBookmarked']
-                                              ? "assets/svgs/bookmark_filled.svg"
-                                              : "assets/svgs/bookmark_hollow.svg",
+                                              ? SvgConstants.bookmarkFilled
+                                              : SvgConstants.bookmarkHollow,
                                           height: 20,
                                           width: 20,
                                         ),

@@ -8,6 +8,11 @@ class GetOptionsEvent extends HomeEvent {}
 class GetOptionsDataEvent extends HomeEvent {}
 
 class SearchEvent extends HomeEvent {
-  String query;
+  final String query;
   SearchEvent(this.query);
+}
+
+class OptionSelectedEvent extends HomeEvent {
+  final int index;
+  OptionSelectedEvent(this.index);
 }
