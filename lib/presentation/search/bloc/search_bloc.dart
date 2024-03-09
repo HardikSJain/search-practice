@@ -12,7 +12,7 @@ class SearchBloc extends Bloc<HomeEvent, HomeState> {
 
   SearchBloc(this._searchUseCase) : super(HomeInitial()) {
     on<GetOptionsEvent>(_getOptionsEvent);
-    on<GetOptionsDataEvent>(_getOptionsData);
+    on<GetOptionsDataEvent>(_getOptionsDataEvent);
     on<SearchEvent>(_searchEvent);
     on<OptionSelectedEvent>(_optionSelectedEvent);
   }
@@ -22,15 +22,15 @@ class SearchBloc extends Bloc<HomeEvent, HomeState> {
     emit(GetOptionsSuccess(options));
   }
 
-  _getOptionsData(GetOptionsDataEvent event, Emitter<HomeState> emit) async {
+  _getOptionsDataEvent(
+      GetOptionsDataEvent event, Emitter<HomeState> emit) async {
     final List<Map<String, dynamic>> optionsData =
         await _searchUseCase.getOptionsData();
     emit(GetOptionsDataSuccess(optionsData));
   }
 
   _searchEvent(SearchEvent event, Emitter<HomeState> emit) async {
-    final List<Map<String, dynamic>> optionsData =
-        await _searchUseCase.getOptionsData();
+    final List<Map<String, dynamic>> optionsData = event.optionsData;
     final List<Map<String, dynamic>> filteredOptionsData = optionsData
         .where((element) =>
             element['heading']
@@ -45,12 +45,11 @@ class SearchBloc extends Bloc<HomeEvent, HomeState> {
 
   _optionSelectedEvent(
       OptionSelectedEvent event, Emitter<HomeState> emit) async {
-    final List<String> options = await _searchUseCase.getOptions();
+    final List<String> options = event.options;
 
     String selectedOption = options[event.index];
 
-    final List<Map<String, dynamic>> optionsData =
-        await _searchUseCase.getOptionsData();
+    final List<Map<String, dynamic>> optionsData = event.optionsData;
 
     if (event.index == 0) {
       return emit(OptionSelectedSuccess(optionsData));

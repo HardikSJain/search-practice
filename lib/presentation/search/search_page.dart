@@ -26,6 +26,7 @@ class _SearchPageState extends State<SearchPage> {
   List<String> options = [];
 
   List<Map<String, dynamic>> optionsData = [];
+  List<Map<String, dynamic>> filteredOptionsData = [];
 
   int selectedIndex = 0;
 
@@ -48,17 +49,18 @@ class _SearchPageState extends State<SearchPage> {
     if (state is GetOptionsDataSuccess) {
       setState(() {
         optionsData = state.optionsData;
+        filteredOptionsData = state.optionsData;
       });
       // print(optionsData);
     }
     if (state is SearchSuccess) {
       setState(() {
-        optionsData = state.optionsData;
+        filteredOptionsData = state.optionsData;
       });
     }
     if (state is OptionSelectedSuccess) {
       setState(() {
-        optionsData = state.filteredOptionsData;
+        filteredOptionsData = state.filteredOptionsData;
       });
     }
   }
@@ -73,11 +75,11 @@ class _SearchPageState extends State<SearchPage> {
     setState(() {
       selectedIndex = index;
     });
-    _searchBloc.add(OptionSelectedEvent(index));
+    _searchBloc.add(OptionSelectedEvent(index, options, optionsData));
   }
 
   onSearch(String value) {
-    _searchBloc.add(SearchEvent(value));
+    _searchBloc.add(SearchEvent(value, optionsData));
   }
 
   // function to return sliced string
@@ -136,7 +138,7 @@ class _SearchPageState extends State<SearchPage> {
                                                 height: 30,
                                                 width: 30,
                                                 decoration: BoxDecoration(
-                                                  color: Color.fromRGBO(
+                                                  color: const Color.fromRGBO(
                                                       217, 217, 217, 1),
                                                   borderRadius:
                                                       BorderRadius.circular(5),
@@ -150,15 +152,17 @@ class _SearchPageState extends State<SearchPage> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  sliceString(optionsData[index]
-                                                      ['heading']),
+                                                  sliceString(
+                                                      filteredOptionsData[index]
+                                                          ['heading']),
                                                   style: const TextStyle(
                                                     color: Colors.white,
                                                   ),
                                                 ),
                                                 Text(
-                                                  sliceString(optionsData[index]
-                                                      ['subheading']),
+                                                  sliceString(
+                                                      filteredOptionsData[index]
+                                                          ['subheading']),
                                                   style: const TextStyle(
                                                     color: Colors.grey,
                                                   ),
@@ -172,15 +176,17 @@ class _SearchPageState extends State<SearchPage> {
                                       IconButton(
                                         onPressed: () {
                                           setState(() {
-                                            optionsData[index]['isBookmarked'] =
-                                                !optionsData[index]
+                                            filteredOptionsData[index]
+                                                    ['isBookmarked'] =
+                                                !filteredOptionsData[index]
                                                     ['isBookmarked'];
 
                                             // api call
                                           });
                                         },
                                         icon: SvgPicture.asset(
-                                          optionsData[index]['isBookmarked']
+                                          filteredOptionsData[index]
+                                                  ['isBookmarked']
                                               ? SvgConstants.bookmarkFilled
                                               : SvgConstants.bookmarkHollow,
                                           height: 20,
@@ -193,7 +199,7 @@ class _SearchPageState extends State<SearchPage> {
                               ),
                             );
                           },
-                          childCount: optionsData.length,
+                          childCount: filteredOptionsData.length,
                         ),
                       ),
                     ],
